@@ -1,0 +1,33 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+{\fonttbl\f0\fnil\fcharset0 Calibri;}
+{\colortbl;\red255\green255\blue255;\red26\green26\blue26;\red16\green60\blue192;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720
+
+\f0\fs30 \cf2 HI web site: {\field{\*\fldinst{HYPERLINK "http://www.stereo.rl.ac.uk/"}}{\fldrslt \cf3 \ul \ulc3 http://www.stereo.rl.ac.uk/}}\
+\'a0\
+Follow \'93Movies & Plots\'94 link to -> {\field{\*\fldinst{HYPERLINK "http://www.stereo.rl.ac.uk/cgi-bin/movies.pl"}}{\fldrslt \cf3 \ul \ulc3 http://www.stereo.rl.ac.uk/cgi-bin/movies.pl}}\
+\'a0\
+Follow \'93Data\'94 link to -> {\field{\*\fldinst{HYPERLINK "http://www.ukssdc.ac.uk/solar/stereo/data.html"}}{\fldrslt \cf3 \ul \ulc3 http://www.ukssdc.ac.uk/solar/stereo/data.html}}\
+\'a0\
+This UKSSDC (UK solar system Data Centre) link allows download of HI (and other SECCHI) data. Note this data is accessible directly from stereo-ops (/. However there is some information of interest available regarding the Level 0, 1 and 2 HI products (and the processing) on the web site.\
+\'a0\
+On stereo-ops, science (as opposed to realtime) HI data can be accessed from /data/ukssdc/STEREO/{\field{\*\fldinst{HYPERLINK "http://ares.nrl.navy.mil/lz"}}{\fldrslt \cf3 \ul \ulc3 ares.nrl.navy.mil/lz}}\
+\'a0\
+There are a few sub-directories, but it is best to use L0, L1 and L2. Other directories reflect the \'93old\'94 data structure, which we updated recently. Updates include the provision of data in MSB and S10 units (necessitating a change in file naming convention).\
+\'a0\
+Please note that some of my code will invariably still point to the old structure.\
+\'a0\
+The img subdirectory of L0, L1 and L2 \'a0contains the most salient data for HI.\
+\'a0\
+Effectively: L1 is the secchi_prepped data and L2 is background subtracted (which we tend to use). L2 HI data is available with long (11-day) and short (HI-1: 1day; HI-2: 3 day) time-scale backgrounds removed. The former is to enable us to investigate longer term structures (streamer belt) and the latter is more relevant to things like CMEs.\
+\'a0\
+In terms of the HI-1 images with overlaid position angle contours, they are available in: /data/ukssdc/STEREO/stereo_work/jaq/CME_LIST_PLOTS\
+\'a0\
+The JACKSON subdirectory shows a slightly different format of plots, just for 2007 (combines difference and background-subtracted images).\
+\'a0\
+The code for making the plots in /data/ukssdc/STEREO/stereo_work/jaq/CME_LIST_PLOTS \'a0is in /users/jaq/STEREO/CME_LIST_PLOTS ({\field{\*\fldinst{HYPERLINK "http://plot_bgsub_images.pro/"}}{\fldrslt \cf3 \ul \ulc3 plot_bgsub_images.pro}} and {\field{\*\fldinst{HYPERLINK "http://plot_diff_images.pro/"}}{\fldrslt \cf3 \ul \ulc3 plot_diff_images.pro}}).\
+\'a0\
+Also, there are scripts that run these on the batch queue (plot_script.sh that sets up the IDL environment and run_plot_script, which runs plot_script.sh).\
+}

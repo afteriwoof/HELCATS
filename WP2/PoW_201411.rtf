@@ -1,0 +1,73 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 ArialMT;\f2\fnil\fcharset0 Calibri;
+\f3\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red26\green26\blue26;\red47\green255\blue18;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\b\fs24 \cf0 Plan of Work\
+
+\b0 \
+
+\i\b Goal
+\i0\b0 : \
+Establish a (portion) of initial catalogued CMEs in the HI data, via the currently processed files with contours overlaid, and using the current jmap widget to determine height-time profiles along a \'91central\'92 position angle in order to provide the fits (FP,SSE,HM).\
+\
+
+\i\b Deadline
+\i0\b0 : ~ 3 months (February)?\
+\
+Group folder:\
+\pard\pardeftab720
+
+\f1\fs26 \cf2 /soft/ukssdc/share/Solar/HELCATS\
+\
+
+\f0\fs24 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\i\b \cf0 Method:\
+
+\i0\b0 \
+1) Looking at casestudy 200802, take the HI images that have the overlaid position angle contours:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f2\fs30 \cf2 /data/ukssdc/STEREO/stereo_work/jaq/CME_LIST_PLOTS\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0 and identify CMEs, notably the following information:\
+\
+\
+\
+\
+
+\i\b \ul GUIDE:\
+
+\i0\b0 \ulnone \
+Log on to stereo-ops\
+\
+cd hi_codes\
+\
+sswidl\
+\
+( \
+secchi_display\
+^select HI1 files 2008/01/01 - 2008/01/31 smoothed running difference stride 1.\
+)\
+\
+.r jmap_widget_pa_final_jpb\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f3 \cf3 \cb0 \CocoaLigature0 jmap_widget_pa,'B','200806B.out',date_start='20080601',date_end='20080631'
+\f0 \cf0 \cb1 \CocoaLigature1 \
+\
+Save each month\'92s point-&-click (at Earth angle, 999) in jmap_pts/ as yyyymmSC.out.\
+\
+\
+INSPECT IMAGES\
+\
+
+\f3 \cf3 \cb0 \CocoaLigature0 gv /data/ukssdc/STEREO/stereo_work/jaq/CME_LIST_PLOTS/2008_A_DIFF/HI1A_20080101_diff.pdf }

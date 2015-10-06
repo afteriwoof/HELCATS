@@ -1,0 +1,55 @@
+# Data in .csv format
+# might need to remove leading white-space in txt files and replace spaces with commas:
+# e.g.
+vim 200801A.out
+:%s/^\s\+
+:%s/ \+/,/g
+# no need to remove T in timestamps  :%s/T/,/g
+:wq
+
+# Code to do above for list of files is convert_csh.sh jamp_pts/months/.
+
+
+# Open SQL in bash by command >> mysql -u root
+
+# SQL inputs:
+
+SELECT DATABASE();
+
+CREATE DATABASE CME_database;
+
+USE CME_database;
+
+SHOW TABLES;
+
+CREATE TABLE CMEs
+	(
+	CME_id FLOAT NOT NULL,
+	CME_datetime TIMESTAMP NOT NULL,
+	CME_height FLOAT NOT NULL,
+	CME_elon FLOAT NOT NULL,
+	CME_spc VARCHAR(10) NOT NULL
+	);
+
+DESCRIBE CMEs;
+
+LOAD DATA LOCAL INFILE "jmap_pts/200801A.csv"
+	INTO TABLE CMEs
+	FIELDS TERMINATED BY ","
+	LINES TERMINATED BY "\n";
+
+ALTER TABLE CMEs ADD COLUMN `id` INT(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT;
+
+SELECT * FROM CMEs;
+
+SELECT	CME_id as "CME ID",
+	CME_datetime as "Date & Time",
+	CME_height as "Height [R_Sun]",
+	CME_elon as "Elongation angle",
+	CME_spc as "Spacecraft"
+FROM CMEs
+LIMIT 100;
+
+
+
+
