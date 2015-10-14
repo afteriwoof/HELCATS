@@ -1,0 +1,305 @@
+;;  Produces 'final' WP3 catalogue, including fitted parameters
+
+PRO FINAL,today
+  LOAD_STEREO_SPICE
+
+  count=[0,0]
+  count0=[0,0]
+  crafts = ['A','B']
+  years = ['2007','2008','2009','2010','2011','2012','2013'];,'2014']
+  halos = [' No','Yes']
+  quality = ['poor','fair','good']
+  lim = [' ','<','>']
+
+
+  FOR c = 0,1 DO BEGIN
+     craft = crafts[c]
+
+     ids = STRARR(2000)
+     j = 0
+     infile2 = 'STEREO-'+craft+'_CME_TRACKING_LIST.txt'
+     OPENR,102,infile2
+     WHILE ~EOF(102) DO BEGIN
+        line = ''
+        READF,102,line
+        fields = STRSPLIT(line,/EXTRACT)
+        ids[j] = fields[0]
+        j = j+1
+     ENDWHILE
+     CLOSE,102
+
+     outfile = 'STEREO-'+craft+'_CME_LIST_WP3_'+today+'.txt'
+     OPENW,101,outfile
+     FOR y = 0,N_ELEMENTS(years)-1 DO BEGIN
+        ;; IF (c EQ 1) AND (y EQ 5) THEN CONTINUE
+        year = years[y]
+        i = -1
+        f0 = 0
+        id = 1
+        cc = [-1,-1]
+        infile = 'ST'+craft+year+'.txt'
+        OPENR,100,infile
+        WHILE ~EOF(100) DO BEGIN
+           i = i+1
+           line = ''
+           READF,100,line
+           fields = STRSPLIT(line,/EXTRACT)
+        IF (i LT 2) THEN CONTINUE
+           cc = [cc,fields[0]]
+
+           ;; Unique identifier
+           IF (cc[i] EQ cc[i-1]) AND (f0 GT 0) THEN BEGIN
+              ;; IF (cc[i] EQ cc[i-1]) THEN BEGIN
+              id = id+1
+           ENDIF ELSE BEGIN
+              id = 1
+           ENDELSE
+           
+           f0 = fields[7]
+           f1 = FIX(STRSPLIT(fields[4],'><',/EXTRACT))
+           f2 = FIX(STRSPLIT(fields[6],'><',/EXTRACT))
+           IF (f0 EQ 0) AND (ABS(f1-f2) GE 20) THEN f0 = 0.5
+
+           ;; Halo
+           IF (N_ELEMENTS(fields) GE 9) THEN BEGIN
+              halo = halos[STRMATCH(fields[8],'*x*')]
+           ENDIF ELSE BEGIN
+              halo = halos[0]
+           ENDELSE
+
+           ;; Greater/Less than
+           l0 = lim[0]
+           l1 = lim[0]
+           IF (STRMATCH(fields[4],'*<*') EQ 1) THEN BEGIN
+              l0 = lim[1]
+              fields[4] = STRMID(fields[4],1,3)
+           ENDIF
+           IF (STRMATCH(fields[6],'*>*') EQ 1) THEN BEGIN
+              l1 = lim[2]
+              fields[6] = STRMID(fields[6],1,3)
+           ENDIF
+
+       IF ((fields[1] LE 3) AND (y EQ 0)) THEN CONTINUE
+       IF (f0 EQ 0) THEN CONTINUE
+
+          jx = WHERE(ids EQ 'HCME_'+craft+'__'+year+STRING(fields[1],FORMAT='(I02)')+$
+                     STRING(fields[0],FORMAT='(I02)')+'_'+STRING(id,FORMAT='(I02)'))
+          
+          data = STRARR(3,7)
+          dates = STRARR(3)
+          dates2 = STRARR(3)
+          dates2[*] = STRING('-999',FORMAT='(A17)')
+          ;; IF (TOTAL(jx) EQ -1) THEN BEGIN
+          count0[c]=count0[c]+1
+          IF (TOTAL(jx) EQ -1) THEN BEGIN
+             title = STRING('-999',FORMAT='(A29)')
+             fields[5] = -999
+             data[*,*] = -999
+             
+          ENDIF ELSE BEGIN
+             get = ids[jx]
+             ;; file = '~/Documents/Data/HELCATS/tracks/*'+get+'*.dat'
+             file = '/soft/ukssdc/share/Solar/HELCATS/tracks/*'+get+'*.dat'
+             title = FILE_SEARCH(file)
+             file1 = title
+             file2 = FILE_SEARCH(file+'_fit')
+             file3 = FILE_SEARCH(file+'_single')
+             
+             ;; PRINT,file2
+             IF (file2 EQ '') THEN BEGIN
+                title = STRING('-999',FORMAT='(A29)')
+                fields[5] = -999
+                data[*,*] = -999
+             ENDIF ELSE BEGIN
+                count[c]=count[c]+1
+                title = STRMID(title,40,29)
+                posa = STRSPLIT(title,'_PA.',/EXTRACT)
+                fields[5] = posa[3+c]
+
+                OPENR,103,file2
+                values = STRARR(110)
+                IF (FILE_LINES(file2) LT 108) THEN BEGIN
+                   title = STRING('-999',FORMAT='(A29)')
+                   fields[5] = -999
+                   data[*,*] = -999
+                   CLOSE,103
+                ENDIF ELSE BEGIN
+                   FOR k = 0,108 DO BEGIN
+                      line = ''
+                      READF,103,line
+                      values[k] = line
+                   ENDFOR
+                   CLOSE,103
+                   
+                   OPENR,105,file3
+                   svalues = STRARR(22)
+                   FOR k = 0,20 DO BEGIN
+                      line = ''
+                      READF,105,line
+                      svalues[k] = line
+                   ENDFOR
+                   CLOSE,105
+                   
+                   OPENR,104,file1
+                   te_i = 0
+                   track_data = [0,0,0]
+                   WHILE ~EOF(104) DO BEGIN
+                      line = ''
+                      READF,104,line
+                      tfields = STRSPLIT(line,' ',/EXTRACT)
+                      track_data =[[track_data],[tfields[0:2]]]
+                      te_i = te_i+1
+                   ENDWHILE
+                   CLOSE,104
+                   track_data = track_data[*,1:te_i-1]
+                   
+                   vels = FLTARR(5,3,2)
+                   phis = FLTARR(5,3,2)
+                   hee = FLTARR(5,3,2)
+                   heeq = FLTARR(5,3,2)
+                   lts = DBLARR(5,3,2)
+                   cfit = FLTARR(5)
+                   FOR m = 0,4 DO BEGIN
+                      mx = 22*m
+                      cfit[m] = N_ELEMENTS(WHERE(track_data[0,*] EQ m))
+                      FOR n = 0,2 DO BEGIN
+                         nx = 6*n
+                         temp1 = STRSPLIT(values[mx+nx+3],' :TZ',/EXTRACT)
+                         temp2 = STRSPLIT(values[mx+nx+4],' :TZ',/EXTRACT)
+                         phis[m,n,1] = temp1[N_ELEMENTS(temp1)-2]
+                         vels[m,n,1] = temp2[N_ELEMENTS(temp2)-2]
+                      ENDFOR
+                   ENDFOR
+                   
+                   FOR n = 0,2 DO BEGIN
+                      nx = 6*n
+                      temp1 = STRSPLIT(values[nx+3],' :TZ',/EXTRACT)
+                      temp2 = STRSPLIT(values[nx+4],' :TZ',/EXTRACT)
+                      temp3 = STRSPLIT(values[nx+5],' :TZ',/EXTRACT)
+                      temp4 = STRSPLIT(values[nx+6],' :TZ',/EXTRACT)
+                      t3 = STRSPLIT(values[nx+7],' -:TZ',/EXTRACT)
+                      tx = N_ELEMENTS(t3)
+                      phis[*,n,0] = temp1[N_ELEMENTS(temp1)-2]
+                      heeq[*,n,0] = temp3[N_ELEMENTS(temp3)-2]
+                      heeq[*,n,1] = temp3[N_ELEMENTS(temp3)-1]
+                      hee[*,n,0] = temp4[N_ELEMENTS(temp4)-2]
+                      hee[*,n,0] = temp4[N_ELEMENTS(temp4)-1]
+                      vels[*,n,0] = temp2[N_ELEMENTS(temp2)-2]
+                      lts[*,n] = DOUBLE(JULDAY(t3[tx-5],t3[tx-4],t3[tx-6],$
+                                               t3[tx-3],t3[tx-2],t3[tx-1]))
+                   ENDFOR
+                   
+                   FOR l = 0,2 DO BEGIN
+                      px = WHERE(phis[*,l,1] LE -360.)
+                      py = WHERE(phis[*,l,1] EQ -180.)
+                      IF (TOTAL(px) NE -1) THEN phis[px,l,1] = phis[px,l,1]+360.
+                      IF (TOTAL(py) NE -1) THEN phis[py,l,1] = phis[py,l,1]+180.
+                      
+                      data[l,0] = vels[0,l,0]
+                      vm = TOTAL(vels[*,l,1]*cfit)/TOTAL(cfit)
+                      data[l,1] = SQRT(TOTAL((vels[*,l,1]-vm)^2*cfit)/TOTAL(cfit))
+                      phi = phis[0,l,0]
+                      pm = TOTAL(phis[*,l,1]*cfit)/TOTAL(cfit)
+                      phi_e = SQRT(TOTAL((phis[*,l,1]-pm)^2*cfit)/TOTAL(cfit))
+                      heeq0 = heeq[0,l,0]
+                      heeq1 = heeq[0,l,1]
+                      hee0 = hee[0,l,0]
+                      hee1 = hee[0,l,1]
+                      
+                      IF (l EQ 0) AND (data[0,1] GT 500.) THEN BEGIN
+                         PRINT,''
+                         PRINT,l,title
+                         PRINT,vels[*,0,1]
+                         PRINT,data[0,1]
+                      ENDIF
+                      
+                      
+                      if (heeq0 GE 180.) THEN heeq0 = heeq0-360.
+                      IF (heeq0 LT -180.) THEN heeq0 = heeq0+360.
+                      
+                      CALDAT,lts[0,l],t_1,t_2,t_0,t_3,t_4,t_5
+                      dates2[l] = STRING(t_0,FORMAT='(I04)')+'-'+STRING(t_1,FORMAT='(I02)')+'-'+$
+                                  STRING(t_2,FORMAT='(I02)')+'T'+STRING(t_3,FORMAT='(I02)')+':'+$
+                                  STRING(t_5,FORMAT='(I02)')+'Z'
+                      dates[l] = STRING(t_0,FORMAT='(I04)')+'-'+STRING(t_1,FORMAT='(I02)')+'-'+$
+                                 STRING(t_2,FORMAT='(I02)')+'T'+STRING(t_3,FORMAT='(I02)')+':'+$
+                                 STRING(t_5,FORMAT='(I02)')+':00.000Z'
+                      
+                      ;; rs=(GET_STEREO_LONLAT(dates[l],craft,/degrees,system='HEE'))[0]
+                      ;; re=(GET_STEREO_LONLAT(dates[l],'Earth',/degrees,system='HEE'))[0]
+                      ;; sclon_hee=(GET_STEREO_LONLAT(dates[l],craft,/degrees,system='HEE'))[1]
+                      ;; sclon_heeq=(GET_STEREO_LONLAT(dates[l],craft,/degrees,system='HEEQ'))[1]
+                      ;; b0=(GET_STEREO_LONLAT(dates[l],craft,system='HCI'))[2]
+                      ;; parad = fields[5]*!pi/180.0
+                      ;; beta = phi*!pi/180.0
+                      ;; lat=asin(cos(b0)*sin(beta)*cos(parad)+sin(b0)*cos(beta))
+                      ;; ;; ATAN2,sin(parad)*sin(beta),cos(b0)*cos(beta)-sin(beta)*cos(parad)*sin(b0),lon
+                      ;; ATAN2,cos(b0)*cos(beta)-sin(beta)*cos(parad)*sin(b0),sin(parad)*sin(beta),lon
+                      ;; ;; lon=atan(sin(parad)*sin(beta),cos(b0)*cos(beta)-sin(beta)*cos(parad)*sin(b0))
+                      ;; lon=sclon_heeq*!pi/180.-lon
+                      ;; coord1=[lon*180./!pi,lat*180.0/!pi]
+                      ;; coord2 = coord1
+                      ;; CONVERT_STEREO_LONLAT,spacecraft=craft,dates[l],coord2,'HEEQ','CARRINGTON',/DEGREES
+                      ;; CONVERT_STEREO_LONLAT,dates[l],coord2,'HEEQ','CARRINGTON',/DEGREES
+                      
+                      coord2 = [heeq0,heeq1]
+                      CONVERT_STEREO_LONLAT,dates[l],coord2,'HEEQ','CARRINGTON',/DEGREES
+                      
+                      IF (ABS(coord2[0]-360.) LT 1.0E-3) THEN coord2[0] = 0.
+                      
+                      data[l,2] = phi
+                      data[l,3] = phi_e
+                      data[l,4] = heeq0 ;coord1[0]
+                      data[l,5] = heeq1 ;coord1[1]
+                      data[l,6] = coord2[0]
+                   ENDFOR
+                ENDELSE
+             ENDELSE
+          ENDELSE
+          
+          IF (c EQ 0) THEN BEGIN
+             low = 4
+             high = 6
+          ENDIF ELSE BEGIN
+             high = 4
+             low = 6
+             tmp = l1
+             l1 = l0
+             l0 = tmp
+          ENDELSE
+          
+          PRINTF,101,'HCME_'+craft+'__'+year+$
+                 STRING(fields[1],FORMAT='(I02)')+STRING(fields[0],FORMAT='(I02)')+'_'+$
+                 STRING(id,FORMAT='(I02)')+'     '+year+'-'+STRING(fields[1],FORMAT='(I02)')+'-'+$
+                 STRING(fields[0],FORMAT='(I02)')+'T'+STRING(fields[2],FORMAT='(I02)')+':'+$
+                 STRING(fields[3],FORMAT='(I02)')+'Z      '+craft+'  '+l0+' '+$
+                 STRING(fields[low],FORMAT='(A3)')+'  '+l1+' '+STRING(fields[high],FORMAT='(A3)')+$
+                 '    '+STRING(quality[fields[7]])+'   '+STRING(fields[5],FORMAT='(I4)')+$
+                 '      '+title+$
+                 '   '+STRING(data[0,0],FORMAT='(I4)')+'   '+STRING(data[0,1],FORMAT='(I4)')+$
+                 '   '+STRING(data[0,2],FORMAT='(I4)')+'   '+STRING(data[0,3],FORMAT='(I4)')+$
+                 '   '+STRING(data[0,4],FORMAT='(I4)')+'   '+STRING(data[0,5],FORMAT='(I4)')+$
+                 '   '+STRING(data[0,6],FORMAT='(I4)')+$
+                 '     '+dates2[0]+$
+                 ;; '   '+STRING(data[1,4],FORMAT='(I4)')+$
+                 '   '+STRING(data[1,0],FORMAT='(I4)')+'   '+STRING(data[1,1],FORMAT='(I4)')+$
+                 '   '+STRING(data[1,2],FORMAT='(I4)')+'   '+STRING(data[1,3],FORMAT='(I4)')+$
+                 '   '+STRING(data[1,4],FORMAT='(I4)')+'   '+STRING(data[1,5],FORMAT='(I4)')+$
+                 '   '+STRING(data[1,6],FORMAT='(I4)')+$
+                 '     '+dates2[1]+$
+                 ;; '   '+STRING(data[2,4],FORMAT='(I4)')+$
+                 '   '+STRING(data[2,0],FORMAT='(I4)')+'   '+STRING(data[2,1],FORMAT='(I4)')+$
+                 '   '+STRING(data[2,2],FORMAT='(I4)')+'   '+STRING(data[2,3],FORMAT='(I4)')+$
+                 '   '+STRING(data[2,4],FORMAT='(I4)')+'   '+STRING(data[2,5],FORMAT='(I4)')+$
+                 '   '+STRING(data[2,6],FORMAT='(I4)')+$
+                 '     '+dates2[2]
+
+       ENDWHILE
+        CLOSE,100
+     ENDFOR
+     CLOSE,101
+  ENDFOR
+  PRINT,count0,FIX(TOTAL(count0))
+  PRINT,count,FIX(TOTAL(count))
+  RETURN
+END

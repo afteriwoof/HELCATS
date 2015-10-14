@@ -1,0 +1,124 @@
+%\documentclass[10pt,preprint]{aastex}
+
+\documentclass[12pt, a4paper, oneside]{article}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage[top=0cm, bottom=7cm, left=2cm, right=2cm]{geometry}
+
+\usepackage{pdfpages}
+
+\usepackage{multicol}
+
+
+\newcommand{\Rs}{$ R_{\odot}$}
+\newcommand{\pB}{$pB$}
+\newcommand{\de}{$^\circ$}
+
+\textfloatsep 8.0pt
+
+
+\usepackage[small]{titlesec}
+
+\setlength{\topmargin}{1pt}%	(gap above headers)
+\setlength{\topskip}{1pt}	%	(between header and text}
+
+\setlength{\parsep}{10pt}	%	(gap between paragraphs)
+\setlength{\parindent}{20pt}	%	(indentation of paragraphs)
+
+\setlength{\floatsep}{2pt} 	%	(space between floats (eg figures))
+\setlength{\textfloatsep}{20pt}%	(space between floats and text)
+\setlength{\abovecaptionskip}{2pt}	%(space above caption)
+\setlength{\belowcaptionskip}{2pt}	%(space below caption)
+
+
+\usepackage{subfigure}
+\usepackage{natbib}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage[outercaption]{sidecap}
+\usepackage{footnote}
+
+\usepackage{wrapfig}
+
+
+\newenvironment{packed_item}{
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
+\newenvironment{packed_enum}{
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{enumerate}}
+
+\begin{document}
+%\textcolor{red}{[]}
+%\tableofcontents
+
+%\renewcommand{\caption}{\scriptsize\itshape}
+
+%\pagenumbering{roman}
+\pagenumbering{gobble}
+
+%\setcounter{page}{-1}
+
+
+
+
+
+\begin{center}
+{\sc \Large HELCATS: WP2 Technical Manual}
+\end{center}
+
+ 
+ %\includegraphics[scale=0.5]{../images/ifa_logo.pdf}
+\begin{center}
+\begin{tabular}{ll}
+\textit{Editor}: Jason P. Byrne -- Oct.~2015
+\end{tabular}
+\end{center}
+ 
+%\vskip 0.05 in
+%{\textsc{Summary}}
+
+%\end{document}
+\section*{\sc Task 2.1: Manual Cataloguing of STEREO/HI CMEs}
+
+The WP2 observational catalogue\footnote{http://www.helcats-fp7.eu/catalogues/wp2\_cat.html} is generated via the following steps (on the {\bf stereo-ops} machine at RAL Space):
+
+\begin{enumerate}
+
+\item Open the HI1 image file to be inspected. \\
+E.g., for the date 2008-02-01 execute the command:\\
+\textit{gv /data/ukssdc/STEREO/stereo\_work/jaq/CME\_LIST\_PLOTS/\\2008\_A\_DIFF/HI1A\_20080201\_diff.pdf}
+
+\item Into the respective year file in the HELCATS directory is entered the CME date and time (of first appearance), the north and south position angles, a central position angle (deemed best for performing a J-map tracking of the event) and quality index (0, 1 or 2).\\
+E.g., for the date 2008-02-01 in file \\
+\textit{/soft/ukssdc/share/Solar/HELCATS/catalog/STA2008.txt}\\
+there is an entry for a CME with parameters\\
+\textit{date 01 $|$ month 02 $|$ hour 10 $|$ min 49 $|$ pa\_N 55 $|$ pa\_mid 80 $|$ pa\_S 95 $|$ quality 1}
+
+\item Run the code {\bf \textit{create\_wp2\_catalogue.pro}} in directory\\
+	\textit{/soft/ukssdc/share/Solar/HELCATS/codes/} \\
+	where the environment variable `HELCATS' points to the directory\\
+	\textit{/soft/ukssdc/share/Solar/HELCATS}.\\
+	This procedure involves the following main steps.
+
+	\begin{enumerate}
+	\item Run the code {\bf \textit{combine\_wp2\_lists.pro}} to collate the yearly text files into a single text file in the appropriate format for the observational catalogue. This generates the files \textit{STEREO-$[$A$|$B$]$\_CME\_LIST\_WP2.txt}.
+
+	\item Run the script {\bf \textit{process\_wp2\_cat.sh}} to merge the STEREO-A and -B lists into a single time ordered catalogue, remove the `Halo' field and output in ASCII, JSON and VOTable formats. The resulting files are respectively named in the convention \textit{HCME\_WP\_Vnn.$[$txt$|$json$|$vot$]$}.
+
+	\end{enumerate}
+	
+\end{enumerate}
+
+
+
+\end{document}
