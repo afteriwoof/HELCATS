@@ -2,7 +2,7 @@
 title: "Investigate CME kinematics in WP3"
 author: "Jason P. Byrne"
 date: "22 October 2015"
-output: html_document
+output: pdf_document
 ---
 
 This is an R Markdown document outlining an initial exploration of the CME kinematics produced from the HELCATS WP3 catalogue.
@@ -10,7 +10,7 @@ This is an R Markdown document outlining an initial exploration of the CME kinem
 
 ```{r}
 # Read in the WP3 CSV file
-wp3 <- read.csv("HCME_WP3_V02.csv")
+wp3 <- read.csv("../WP3_catalogue/HCME_WP3_V02.csv")
 
 # Print the number of rows and variables, and names of the variables
 dim(wp3)
@@ -53,42 +53,6 @@ names(wp3) <- c("ID",
 
 # Simple plots
 
-compare_speeds <- function(wp3){
-
-	#dev.copy("CME_speeds.png",width=8,height=8,unit="in",res=300)
-	#pdf("Compare_CME_Speeds.pdf",width=8,height=3)
-	par(mfrow=c(1,3),pty="s")
-	plot(wp3$FP_Speed, wp3$SSE_Speed, 
-		xlab="FP Speed (km/s)", ylab="SSE Speed (km/s)",#main="WP3 CME Speeds",
-		xlim=c(0,3000), ylim=c(0,3000),
-		pch=3)
-	abline(0,1,col="black",lty=5)
-	reg <- lm(wp3$SSE_Speed~wp3$FP_Speed)
-	abline(reg,col="red")
-	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
-	
-	plot(wp3$FP_Speed, wp3$HM_Speed,
-	        xlab="FP Speed (km/s)", ylab="HM Speed (km/s)",main="WP3 CME Speeds",
-	        xlim=c(0,5000), ylim=c(0,5000),
-	        pch=3)
-	abline(0,1,col="black",lty=5)
-	reg <- lm(wp3$HM_Speed~wp3$FP_Speed)
-	abline(reg,col="red")
-	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
-	
-	plot(wp3$HM_Speed, wp3$SSE_Speed,
-	        xlab="HM Speed (km/s)", ylab="SSE Speed (km/s)",#main="WP3 CME Speeds",
-	        xlim=c(0,5000), ylim=c(0,5000),
-	        pch=3)
-	abline(0,1,col="black",lty=5)
-	reg <- lm(wp3$SSE_Speed~wp3$HM_Speed)
-	abline(reg,col="red")
-	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
-	
-	#dev.off()
-}
-
-#compare_speeds(wp3)
 
 # Plot out stats on the speeds
 
@@ -147,6 +111,43 @@ speed_hist <- function(speed,tit){
 speed_hist(wp3$FP_Speed,"Fixed-Phi")
 speed_hist(wp3$SSE_Speed,"Self-Similar Expansion")
 speed_hist(wp3$HM_Speed,"Harmonic Mean")
+
+compare_speeds <- function(wp3){
+
+	#dev.copy("CME_speeds.png",width=8,height=8,unit="in",res=300)
+	#pdf("Compare_CME_Speeds.pdf",width=8,height=3)
+	par(mfrow=c(1,3),pty="s")
+	plot(wp3$FP_Speed, wp3$SSE_Speed, 
+		xlab="FP Speed (km/s)", ylab="SSE Speed (km/s)",#main="WP3 CME Speeds",
+		xlim=c(0,3000), ylim=c(0,3000),
+		pch=3)
+	abline(0,1,col="black",lty=5)
+	reg <- lm(wp3$SSE_Speed~wp3$FP_Speed)
+	abline(reg,col="red")
+	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
+	
+	plot(wp3$FP_Speed, wp3$HM_Speed,
+	        xlab="FP Speed (km/s)", ylab="HM Speed (km/s)",#main="WP3 CME Speeds",
+	        xlim=c(0,5000), ylim=c(0,5000),
+	        pch=3)
+	abline(0,1,col="black",lty=5)
+	reg <- lm(wp3$HM_Speed~wp3$FP_Speed)
+	abline(reg,col="red")
+	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
+	
+	plot(wp3$HM_Speed, wp3$SSE_Speed,
+	        xlab="HM Speed (km/s)", ylab="SSE Speed (km/s)",#main="WP3 CME Speeds",
+	        xlim=c(0,5000), ylim=c(0,5000),
+	        pch=3)
+	abline(0,1,col="black",lty=5)
+	reg <- lm(wp3$SSE_Speed~wp3$HM_Speed)
+	abline(reg,col="red")
+	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
+	
+	#dev.off()
+}
+
+compare_speeds(wp3)
 
 ```
 
