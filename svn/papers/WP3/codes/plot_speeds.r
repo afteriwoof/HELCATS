@@ -1,0 +1,162 @@
+# Read in the WP3 CSV file
+wp3 <- read.csv("../HCME_WP3_V02.csv")
+
+# Print the number of rows and variables, and names of the variables
+dim(wp3)
+names(wp3)
+
+names(wp3) <- c("ID",
+		"Date",
+		"Spacecraft",
+		"LN",
+		"PA_N",
+		"LS",
+		"PA_S",
+		"Quality",
+		"PA_Fit",
+		"FP_Speed",
+		"FP_SpeedErr",
+		"FP_Phi",
+		"FP_PhiErr",
+		"FP_HEEQLon",
+		"FP_HEEQLat",
+		"FP_CarrLon",
+		"FP_LaunchUTC",
+		"SSE_Speed",
+                "SSE_Speed Err",
+                "SSE_Phi",
+                "SSE_PhiErr",
+                "SSE_HEEQLon",
+                "SSE_HEEQLat",
+                "SSE_CarrLon",
+                "SSE_LaunchUTC",
+		"HM_Speed",
+                "HM_Speed Err",
+                "HM_Phi",
+                "HM_PhiErr",
+                "HM_HEEQLon",
+                "HM_HEEQLat",
+                "HM_CarrLon",
+                "HM_LaunchUTC")
+
+
+# Simple plots
+
+compare_speeds <- function(wp3){
+
+	#dev.copy("CME_speeds.png",width=8,height=8,unit="in",res=300)
+	pdf("Compare_CME_Speeds.pdf",width=8,height=3)
+	par(mfrow=c(1,3),pty="s")
+	plot(wp3$FP_Speed, wp3$SSE_Speed, 
+		xlab="FP Speed (km/s)", ylab="SSE Speed (km/s)",#main="WP3 CME Speeds",
+		xlim=c(0,3000), ylim=c(0,3000),
+		pch=3)
+	abline(0,1,col="black",lty=5)
+	reg <- lm(wp3$SSE_Speed~wp3$FP_Speed)
+	abline(reg,col="red")
+	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
+	
+	plot(wp3$FP_Speed, wp3$HM_Speed,
+	        xlab="FP Speed (km/s)", ylab="HM Speed (km/s)",main="WP3 CME Speeds",
+	        xlim=c(0,5000), ylim=c(0,5000),
+	        pch=3)
+	abline(0,1,col="black",lty=5)
+	reg <- lm(wp3$HM_Speed~wp3$FP_Speed)
+	abline(reg,col="red")
+	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
+	
+	plot(wp3$HM_Speed, wp3$SSE_Speed,
+	        xlab="HM Speed (km/s)", ylab="SSE Speed (km/s)",#main="WP3 CME Speeds",
+	        xlim=c(0,5000), ylim=c(0,5000),
+	        pch=3)
+	abline(0,1,col="black",lty=5)
+	reg <- lm(wp3$SSE_Speed~wp3$HM_Speed)
+	abline(reg,col="red")
+	legend("bottomright",c(paste("y =",signif(reg$coefficients[[2]],digits=2),"x +",round(reg$coefficients[[1]])),"y = x"),lty=c(1,5),col=c("red","black"),bty="n",cex=0.8)
+	
+	dev.off()
+}
+
+#compare_speeds(wp3)
+
+# Plot out stats on the speeds
+
+speed_boxplots <- function(wp3){
+
+	pdf("CME_Speeds_boxplot.pdf",width=8,height=8)
+	boxplot(wp3$FP_Speed, wp3$SSE_Speed, wp3$HM_Speed,
+                main = "WP3 CME Speeds",
+                xlab = "Geometrical Fitting Model",
+                ylab = "Speed (km/s)",
+                ylim = c(0,1500),
+		axes = F
+		)
+        axis(1, at=1:3, labels=c("Fixed-Phi","Self-Similar Exp.","Harmonic Mean"))
+	axis(2, at=seq(0,1500,by=500), las=1)
+	axis(2, at=seq(0,1500,by=100), labels=F, tcl=-0.2)
+	
+	# Ignore the horizontal version of the boxplot
+	if (FALSE) {
+	boxplot(wp3$FP_Speed, wp3$SSE_Speed, wp3$HM_Speed,
+                main = "WP3 CME Speeds",
+                ylab = "Geometrical Fitting Model",
+                xlab = "Speed (km/s)",
+                ylim = c(0,1500),
+                axes = F,
+		horizontal = TRUE
+                )
+        axis(2, at=1:3, labels=c("Fixed-Phi","Self-Similar Exp.","Harmonic Mean"))
+        axis(1, at=seq(0,1500,by=500), las=1)
+        axis(1, at=seq(0,1500,by=100), labels=F, tcl=-0.2)
+	}
+
+	dev.off()
+
+}
+
+speed_boxplots(wp3)
+
+speed_hist <- function(speed,tit){
+
+	pdf(paste("CME_Speeds_hist",tit,".pdf"),width=8,height=8)
+	
+	layout(matrix(seq(2)),heights=c(0.7,0.3))
+	par(mar=c(0,4.1,4.1,2.1)) 
+	hist(speed,breaks=100,axes=F,main=tit,xlab="",ylab="")
+	axis(2)
+	par(mar=c(5.1,4.1,0,2.1),mgp=c(3,0.5,0.0))
+	boxplot(speed,horizontal=TRUE,axes=FALSE)
+	axis(1,at=seq(0,5000,by=500),xpd=TRUE)
+	mtext("Speed (km/s)",side=1,line=2.5,font=2)
+
+	dev.off()
+
+}
+
+speed_hist(wp3$FP_Speed,"Fixed-Phi")
+speed_hist(wp3$SSE_Speed,"Self-Similar Expansion")
+speed_hist(wp3$HM_Speed,"Harmonic Mean")
+
+
+# Calculate angular widths
+
+ang_widths <- function(wp3,tit){
+	wp3_A <- wp3[wp3$Spacecraft=='A',]
+	wp3_B <- wp3[wp3$Spacecraft=='B',]
+	wp3_A$AngWidth <- wp3_A$PA_S - wp3_A$PA_N
+	wp3_B$AngWidth <- wp3_B$PA_N - wp3_B$PA_S
+	aw_bins = 20
+	steps = seq(20,max(wp3_A$AngWidth,wp3_B$AngWidth),by=aw_bins)
+	wp3_A_sub <- data.frame(steps=steps)
+	wp3_A_sub[c("FPspeeds","HMspeeds","SSEspeeds")] <- 0
+	wp3_B_sub <- data.frame(steps=steps)
+	wp3_B_sub[c("FPspeeds","HMspeeds","SSEspeeds")] <- 0
+	for(i in 1:(length(steps)-1)){
+		wp3_A_sub <- subset(wp3_A,AngWidth>steps[i] & AngWidth<steps[i+1])
+		wp3_A_meanspeeds[i] <- mean(wp3_A_sub$
+		wp3_B_sub <- subset(wp3_B,AngWidth>steps[i] & AngWidth<steps[i+1])
+		
+	pdf(paste("CME_AngWidth_Speeds_hist",tit,".pdf"),width=8,height=8)
+	
+}
+
