@@ -1,0 +1,7 @@
+import os
+
+host_path = '/Users/sqz00392/RAL/HELCATS/svn/papers/WP3'
+
+cdaw_path = os.path.join(host_path,'cdaw_catalog')
+
+
