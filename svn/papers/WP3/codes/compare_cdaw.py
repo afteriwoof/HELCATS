@@ -1,49 +1,32 @@
 #!/usr/bin/env python
 
+import os
 import numpy as np
 import pandas as pd
-###
-# Loop over lines in text file, creating a list of dictionaries
-# Open the CDAW CME text file for reading
-f=open('../univ_all.txt','r')
-# Read in the header lines first
-hdr1 = f.readline()
-hdr2 = f.readline()
-hdr3 = f.readline()
-hdr4 = f.readline()
-# initialise the data list
-data = []
-for line in f:
-	print(line)
-	line = line.strip()
-	columns = line.split()
-	source = {}
-	source['date'] = columns[0]
-	source['time'] = columns[1]
-	source['cpa'] = int(columns[2]) if columns[2]!='Halo' else np.NaN
-	source['width'] = int(columns[3])
-	source['lin_speed'] = int(columns[4]) if columns[4]!='----' else np.NaN
-	source['quad_speed_init'] = int(columns[5]) if columns[5]!='----' else np.NaN
-	source['quad_speed_final'] = int(columns[6]) if columns[6]!='----' else np.NaN
-	source['quad_speed_20'] = int(columns[7]) if columns[7]!='----' else np.NaN
-	source['accel'] = float(columns[8].strip('*')) if columns[8]!='------' else np.NaN
-	source['mpa'] = int(columns[11])
-	if len(columns)>12:
-		source['remarks'] = ' '.join(columns[12:])
-	data.append(source)
+import matplotlib.pyplot as plt
+import config
 
-f.close()
+from read_cdaw import cdaw
+from savefig import save
 
-#Creating a pandas dataframe
-cols = ['date','time','cpa','width','lin_speed','quad_speed_init','quad_speed_final','quad_speed_20','accel','mpa','remarks']
-df = pd.DataFrame(data,columns=cols)
-df.describe()
 # Convert strings to numerics
 # df = df.convert_objects(convert_numeric=True)
 # Drop NaNs
 # df.dropna(axis='rows',how='any',inplace=True)
+cdaw.describe()
+# Generate some initial plots for CDAW
+cdaw.hist()
+save(path=os.path.join(config.wp3_path,"cdaw_cme_catalog/cdaw_hist"),verbose=True)
+#plt.show()
 
 
+
+# Read in the WP3 catalogue
+wp3 = pd.read_csv(os.path.join(config.wp3_path,'HCME_WP3_V02.csv'))
+
+wp3_speeds=wp3[['FP speed[kms-1]','SSE speed[kms-1]','HM speed[kms-1]']]
+wp3_speeds.plot(kind='hist',stacked=True,bins=100)
+save(path=os.path.join(config.wp3_path,"wp3_speeds_hist"),verbose=True)
 
 
 
