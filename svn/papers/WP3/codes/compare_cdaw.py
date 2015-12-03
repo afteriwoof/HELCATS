@@ -24,9 +24,10 @@ save(path=os.path.join(config.wp3_path,"cdaw_cme_catalog/cdaw_hist"),verbose=Tru
 # Read in the WP3 catalogue
 wp3 = pd.read_csv(os.path.join(config.wp3_path,'HCME_WP3_V02.csv'))
 
-wp3_speeds=wp3[['FP speed[kms-1]','SSE speed[kms-1]','HM speed[kms-1]']]
+wp3_speeds=wp3[['FP','SSE','HM']]
 wp3_speeds.plot(kind='hist',stacked=True,bins=100)
 save(path=os.path.join(config.wp3_path,"wp3_speeds_hist"),verbose=True)
 
+# Split speeds by year
 
 
