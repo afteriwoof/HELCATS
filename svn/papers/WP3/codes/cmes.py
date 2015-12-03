@@ -11,7 +11,8 @@ Keywords:
 Calls	:	os, numpy, matplotlib, pandas
 Written	:	Jason P Byrne, STFC/RAL Space, Dec 2015 (jason.byrne@stfc.ac.uk)
 Revisions:
-2015-01-01 JPB : Working in accordance with sunpy project guidelines.
+2015-12-01 JPB : Working in accordance with sunpy project guidelines.
+2015-12-03 JPB	:	Adding hicactus function.
 '''
 
 import os
